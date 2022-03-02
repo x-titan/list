@@ -160,7 +160,7 @@ export default class List {
   removeFromValue(value) {
     if (this.isEmpty()) return null
     let curr = this.node, prev
-    while (isNode(curr)) {
+    while (curr) {
       if (value === curr.value) {
         prev.node = curr.node
         curr.node = null
