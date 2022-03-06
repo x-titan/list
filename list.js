@@ -1,18 +1,5 @@
-// const corner = "+"
-// const horBorder = "—"
-// const verBorder = "|"
-// const space = " "
-// const n = "\n"
-// const width = 46
-// const LongHorBorder = corner + horBorder.repeat(width) + corner
-// const LongSpace = verBorder + space.repeat(width) + verBorder
-// function box(value) {
-//   value = value.replace(n, "\\n")
-//   if (value.length > width) value = value.slice(0, width - 5) + "..."
-//   return LongSpace + n + verBorder + space + value +
-//     space.repeat(width - value.length - 1) + verBorder + n +
-//     LongSpace + n + LongHorBorder
-// }
+'use strict'
+const { iterator, toStringTag } = Symbol
 class Node {
   /** @type {Node} */
   #node
@@ -28,7 +15,6 @@ class Node {
   get node() { return this.#node }
   toString() { return "" + this.value }
 }
-
 export default class List {
     /** @type {Node} */ #node = null
   set node(node) {
@@ -175,11 +161,15 @@ export default class List {
     this.each(console.log)
     return this
   }
-  // toTable(title = "LinkedList") {
-  //   let res = LongHorBorder + n + box(title)
-  //   this.each((x, i) => res += n + box(i + " -> " + x.value))
-  //   return res
-  // }
+  [toStringTag] = this.constructor.name;
+  [iterator] = function* () {
+    if (this.isEmpty()) return
+    let curr = this.#node
+    while (curr) {
+      yield curr
+      curr = curr.node
+    }
+  }
   toString() { return "[List node:" + this.node.toString() + "]" }
   static isList(list) { return list instanceof List }
   static isNode(node) { return node instanceof Node }
@@ -187,6 +177,6 @@ export default class List {
     if (!List.isNode(node)) node = new Node(node)
     return node
   }
-  static toString() { return "class List{ [native code] }" }
+  static toString() { return "class List { [native code] }" }
   static get Node() { return Node }
 }

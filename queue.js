@@ -1,10 +1,10 @@
 import List from "./list.js"
-
+const { iterator, toStringTag } = Symbol
 
 export default class Queue {
   #list
   constructor() { this.#list = new List() }
-  set(value) {
+  add(value) {
     this.#list.push(value)
     return this
   }
@@ -34,5 +34,10 @@ export default class Queue {
     return this
   }
   isEmpty() { return this.#list.isEmpty() }
+  [toStringTag] = this.constructor.name;
+  [iterator] = function* () {
+    for (const { value } of this.#list) yield value
+  }
   get length() { return this.#list.length }
+  static toString() { return "class Queue { [native code] }" }
 }

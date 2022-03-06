@@ -1,9 +1,10 @@
 import List from "./list.js"
+const { iterator, toStringTag } = Symbol
 
 export default class Stack {
   #list
   constructor() { this.#list = new List() }
-  set(value) {
+  add(value) {
     this.#list.unshift(value)
     return this
   }
@@ -33,5 +34,10 @@ export default class Stack {
     return this
   }
   isEmpty() { return this.#list.isEmpty() }
+  [toStringTag] = this.constructor.name;
+  [iterator] = function* () {
+    for (const { value } of this.#list) yield value
+  }
   get length() { return this.#list.length }
+  static toString() { return "class Stack { [native code] }" }
 }
