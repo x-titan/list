@@ -14,9 +14,9 @@ export default class Queue {
    * @param {boolean} [stoppable]
    */
   each(fn, stoppable) {
-    this.#list.each((node, index) => {
-      fn(node.value, index)
-    }, stoppable || true)
+    this.#list.each((node, index) =>
+      fn(node.value, index, this)
+      , stoppable || true)
     return this
   }
   clear() {
@@ -34,10 +34,21 @@ export default class Queue {
     return this
   }
   isEmpty() { return this.#list.isEmpty() }
-  [toStringTag] = this.constructor.name;
+  toString() {
+    let value = "empty"
+    if (!this.isEmpty()) {
+      value = ""
+      this.#list.each((node, i) => {
+        if (i !== 0) value += ","
+        value += node.toString()
+        if (i === 2) return false
+      }, true)
+    }
+    return "[" + this.constructor.name + " <" + value + ">]"
+  }
   [iterator] = function* () {
     for (const { value } of this.#list) yield value
   }
   get length() { return this.#list.length }
-  static toString() { return "class Queue { [native code] }" }
+  static toString = List.toString
 }

@@ -64,28 +64,27 @@ export default class List {
     return curr
   }
   /**
-   * @param {(node:Node,index:number)=>void} fn
+   * @param {(node:Node,index:number,list:List)=>void} fn
    * @param {boolean} stoppable
    */
   each(fn, stoppable = false) {
     if (this.isEmpty()) return this
-    let curr = this.#node, index = 0
-    while (curr) {
-      if (fn(curr, index++) === false && stoppable) break
-      curr = curr.node
-    }
+    let index = 0
+    for (const node of this)
+      if (fn(node, index++, this) ===
+        false && stoppable === true) break
     return this
   }
   /** @param {Node} node */
   hasNode(value) {
-    let res = false
-    this.each(node => !(res = (node === value)))
-    return res
+    for (const node of this)
+      if (node === value) return true
+    return false
   }
   has(value) {
-    let res = false
-    this.each(node => !(res = (node.value === value)))
-    return res
+    for (const node of this)
+      if (node.value === value) return true
+    return false
   }
   clear() {
     this.node = null
@@ -101,11 +100,12 @@ export default class List {
       curr = temp
     }
     this.#node = prev
-    return this;
+    return this
   }
   toArray() {
     const arr = []
-    this.each(node => arr.push(node.value))
+    for (const node of this)
+      arr.push(node.value)
     return arr
   }
   fromArray(array) {
@@ -118,42 +118,36 @@ export default class List {
   }
   findByValue(value) {
     if (this.isEmpty()) return
-    const { isNode } = List
-    let curr = this.node
-    while (isNode(curr)) {
-      if (curr.value === value) break
-      curr = curr.node
-    }
-    return curr
+    for (const node of this)
+      if (node.value === value) return node
+    return null
   }
   removeFromIndex(index) {
     if (this.isEmpty() || index < 0) return null
     if (index === 0) return this.shift()
-    const { isNode } = List
-    let curr = this.node, prev, i = 0
-    while (isNode(curr)) {
-      if (index === i) {
-        prev.node = curr.node
-        curr.node = null
-        return curr
+    let i_ = 0
+    let prev = this.node
+    for (const node of this) {
+      if (index === i_++) {
+        prev.node = node.node
+        node.node = null
+        return node
       }
-      prev = curr
-      curr = curr.node
-      i++
+      prev = node
     }
     return null
   }
   removeFromValue(value) {
     if (this.isEmpty()) return null
-    let curr = this.node, prev
-    while (curr) {
-      if (value === curr.value) {
-        prev.node = curr.node
-        curr.node = null
-        return curr
+    if (this.node.value === value) return this.shift()
+    let prev = this.node
+    for (const node of this) {
+      if (node.value === value) {
+        prev.node = node.node
+        node.node = null
+        return node
       }
-      prev = curr
-      curr = curr.node
+      prev = node
     }
     return null
   }
@@ -161,7 +155,6 @@ export default class List {
     this.each(console.log)
     return this
   }
-  [toStringTag] = this.constructor.name;
   [iterator] = function* () {
     if (this.isEmpty()) return
     let curr = this.#node
@@ -170,13 +163,24 @@ export default class List {
       curr = curr.node
     }
   }
-  toString() { return "[List node:" + this.node.toString() + "]" }
+  toString() {
+    let value = "empty"
+    if (!this.isEmpty()) {
+      value = ""
+      this.each((node, i) => {
+        if (i !== 0) value += ","
+        value += node.toString()
+        if (i === 2) return false
+      }, true)
+    }
+    return "[" + this.constructor.name + " <" + value + ">]"
+  }
   static isList(list) { return list instanceof List }
   static isNode(node) { return node instanceof Node }
   static newNode(node) {
     if (!List.isNode(node)) node = new Node(node)
     return node
   }
-  static toString() { return "class List { [native code] }" }
+  static toString() { return "function " + this.name + " { [native code] }" }
   static get Node() { return Node }
 }
