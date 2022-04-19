@@ -1,9 +1,11 @@
 import List from "./list.js"
-const { iterator, toStringTag } = Symbol
+const { iterator } = Symbol
 
 export default class Queue {
   #list
   constructor() { this.#list = new List() }
+  shift() { return this.get() }
+  push(value) { return this.add(value) }
   add(value) {
     this.#list.push(value)
     return this
@@ -14,9 +16,10 @@ export default class Queue {
    * @param {boolean} [stoppable]
    */
   each(fn, stoppable) {
-    this.#list.each((node, index) =>
-      fn(node.value, index, this)
-      , stoppable || true)
+    let index = 0
+    for (const node of this.#list)
+      if (fn(node.value, index++, this) ===
+        false && stoppable === true) break
     return this
   }
   clear() {
@@ -46,9 +49,7 @@ export default class Queue {
     }
     return "[" + this.constructor.name + " <" + value + ">]"
   }
-  [iterator] = function* () {
-    for (const { value } of this.#list) yield value
-  }
+  *[iterator]() { for (const { value } of this.#list) yield value }
   get length() { return this.#list.length }
   static toString = List.toString
 }
