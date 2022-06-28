@@ -1,5 +1,9 @@
-'use strict'
+'use strict';
+
+/** @typedef {(node: Node, index: number, list: List) => boolean} callback */
+
 const { iterator } = Symbol
+
 class Node {
   /** @type {Node} */
   #node
@@ -26,11 +30,19 @@ export default class List {
     while (curr) { curr = curr.node; index++ }
     return index
   }
+  /** @return {Node} */
   get last() {
     let last = null
-    for (const node of this)
-      last = node
+    for (const node of this) last = node
     return last
+  }
+  *[iterator]() {
+    if (!this.node) return
+    let curr = this.node
+    while (curr) {
+      yield curr
+      curr = curr.node
+    }
   }
   isEmpty() { return !this.node }
   /** @param {Node} node */
@@ -70,26 +82,27 @@ export default class List {
     return curr
   }
   /**
-   * @param {(node:Node,index:number,list:List)=>void} fn
+   * @param {callback} fn
    * @param {boolean} stoppable
    */
   each(fn, stoppable = false) {
     let index = 0
-    for (const node of this)
-      if (fn(node, index++, this) ===
-        false && stoppable === true) break
+    for (const node of this) {
+      if (
+        fn(node, index++, this) === false
+        && stoppable === true
+      ) break
+    }
     return this
   }
   /** @param {Node} node */
   hasNode(value) {
     if (!List.isNode(value)) return false
-    for (const node of this)
-      if (node === value) return true
+    for (const node of this) if (node === value) return true
     return false
   }
   has(value) {
-    for (const node of this)
-      if (node.value === value) return true
+    for (const node of this) if (node.value === value) return true
     return false
   }
   clear() { this.node = null; return this }
@@ -107,24 +120,28 @@ export default class List {
   }
   toArray() {
     const arr = []
-    for (const node of this)
-      arr.push(node.value)
+    for (const node of this) arr.push(node.value)
     return arr
   }
-  fromArray(array) {
-    if (!Array.isArray(array)) return this
+  /** @param {Array} arr */
+  fromArray(arr) {
+    if (!Array.isArray(arr)) return this
     this.clear()
     let head = new Node(), last = head
-    array.forEach(value => last = last.node = new Node(value))
+    arr.forEach((value) => (last = last.node = new Node(value)))
     this.node = head.node
     return this
   }
+  /** @return {Node | null} */
   findByValue(value) {
     if (this.isEmpty()) return
-    for (const node of this)
-      if (node.value === value) return node
+    for (const node of this) if (node.value === value) return node
     return null
   }
+  /**
+   * @param {number} index
+   * @return {Node | null}
+   */
   removeFromIndex(index) {
     if (this.isEmpty() || index < 0) return null
     if (index === 0) return this.shift()
@@ -140,6 +157,7 @@ export default class List {
     }
     return null
   }
+  /** @return {Node | null} */
   removeFromValue(value) {
     if (this.isEmpty()) return null
     if (this.node.value === value) return this.shift()
@@ -154,69 +172,121 @@ export default class List {
     }
     return null
   }
+  /**
+   * @param {number} start
+   * @param {number} count
+   */
   splice(start, count) {
     const list = new List()
-    if (!this.isEmpty()) {
-      const end = start + count
+    if (this.isEmpty()) return list
+    if (typeof start !== "number" || typeof count !== "number") {
+      throw new TypeError("Unknown arguments")
+    }
+    start = Math.round(Math.abs(start)) - 1
+    count = Math.round(Math.abs(count))
+    const end = start + count
+    let index = 0
+    let curr = this.node
+    if (start === 0) {
+      list.node = this.node
+      while (curr) {
+        if (end <= index++) {
+          this.node = curr.node
+          curr.node = null
+          break
+        }
+        curr = curr.node
+      }
+    } else {
       let prev = this.node
-      let index = 0
       for (const node of this) {
-        if (start === index) list.node = node
-        if (start <= index) {
+        if (start === index) {
+          list.node = node.node
+          prev = node
+        }
+        if (end <= index) {
           prev.node = node.node
-          if (end === index) {
-            node.node = null
-            break
-          }
-        } else prev = node
+          node.node = null
+          break
+        }
         index++
       }
     }
     return list
   }
+  /** @param {List} list */
   assign(list) {
-    if (!List.isList(list))
-      throw new TypeError("First argument is not a List. Reqruire a List object")
-    if (!list.isEmpty()) {
-      const { newNode } = List
-      let head = null
-      let last = null
-      for (const node of list) {
-        const n = newNode(node)
-        if (head) last.node = n
-        else head = n
-        last = n
+    if (!List.isList(list)) {
+      throw new TypeError(
+        "First argument is not a List. "
+        + "Reqruire a List object."
+      )
+    }
+    if (list.isEmpty()) return this
+    const { newNode } = List
+    let head = null
+    let last = null
+    for (const node of list) {
+      const n = newNode(node)
+      if (head) last.node = n
+      else head = n
+      last = n
+    }
+    this.push(head)
+    return this
+  }
+  /**
+   * @param {number} start
+   * @param {number} end
+   */
+  slice(start, end) {
+    const list = new List()
+    if (this.isEmpty()) return list
+    if (typeof start !== "number") {
+      throw new TypeError("Unknown arguments")
+    }
+    start = Math.round(Math.abs(start))
+    if (typeof end === "number") {
+      end = Math.round(Math.abs(end))
+    } else { end = start }
+    const { newNode } = List
+    let index = 0
+    for (const node of this) {
+      if (start <= index && index <= end) {
+        list.push(newNode(node))
       }
-      this.push(head)
+      if (index >= end) break
+      index++
+    }
+    return list
+  }
+  /** @param {callback} fn */
+  filter(fn) {
+    if (typeof fn !== "function") {
+      throw new TypeError("First argument is not a function")
+    }
+    if (this.isEmpty()) return this
+    let index = 0
+    while (this.node) {
+      if (!fn(this.node, index++, this)) {
+        this.node = this.node.node
+      } else break
+    }
+    let prev = this.node
+    let node = prev.node
+    while (node) {
+      if (!fn(node, index++, this)) {
+        prev.node = node.node
+      } else {
+        prev = node
+      }
+      node = node.node
     }
     return this
   }
-  slice(start, end) {
-    const list = new List()
-    if (!this.isEmpty()) {
-      if (typeof end !== "number") end = start
-      const { newNode } = List
-      let index = 0
-      for (const node of this) {
-        if (start <= index && index <= end)
-          list.push(newNode(node))
-        index++
-      }
-    }
-    return list
-  }
-  filter(fn) {
-    if (typeof fn !== "function")
-      throw new TypeError("1 argument is not a function")
-    const list = new List()
-    if (!this.isEmpty()) {
-      const { newNode } = List
-      let index = 0
-      for (const node of this)
-        if (fn(node, index++, this))
-          list.push(newNode(node))
-    }
-    return list
+  trim() {
+    if (this.isEmpty()) return this
+    return this.filter((node) => (node !== undefined && node !== null))
   }
   clone() {
     const list = new List
@@ -234,16 +304,8 @@ export default class List {
     return list
   }
   print() { return this.each(console.log) }
-  *[iterator]() {
-    if (this.isEmpty()) return
-    let curr = this.node
-    while (curr) {
-      yield curr
-      curr = curr.node
-    }
-  }
   toString() {
-    let value = "empty"
+    let value = ""
     if (!this.isEmpty()) {
       value = ""
       let i = 0
@@ -255,11 +317,17 @@ export default class List {
     }
     return "[" + this.constructor.name + " <" + value + ">]"
   }
-  static fromArray(arr) { return new List().fromArray(arr) }
+  /** @param {Array} arr */
+  static fromArray(arr) { return (new List()).fromArray(arr) }
+  /**
+   * @param {List | Array} list
+   * @param {List | Array} others
+   */
   static assign(list, ...others) {
     if (Array.isArray(list)) list = List.fromArray(list)
-    if (!List.isList(list))
+    if (!List.isList(list)) {
       throw new TypeError("Invalid arguments. Reqruired list objects")
+    }
     const { newNode } = List
     let index = others.length
     let head
@@ -294,8 +362,13 @@ export default class List {
     return new Node(List.isNode(value) ? value.value : value)
   }
   static toString() {
-    return "function " + this.name +
-      " { [native code] }"
+    return (
+      "function "
+      + this.name
+      + " { [native code] }"
+    )
   }
   static get Node() { return Node }
 }
+
+globalThis.List = List
