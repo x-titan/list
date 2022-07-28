@@ -4,6 +4,7 @@
 
 const { iterator } = Symbol
 const { isArray } = Array
+const {abs,round} = Math
 
 class Node {
   /** @type {Node} */
@@ -183,8 +184,8 @@ export default class List {
     if (typeof start !== "number" || typeof count !== "number") {
       throw new TypeError("Unknown arguments")
     }
-    start = Math.round(Math.abs(start)) - 1
-    count = Math.round(Math.abs(count))
+    start = round(abs(start)) - 1
+    count = round(abs(count))
     const end = start + count
     let index = 0
     let curr = this.node
@@ -246,9 +247,9 @@ export default class List {
     if (typeof start !== "number") {
       throw new TypeError("Unknown arguments")
     }
-    start = Math.round(Math.abs(start))
+    start = round(abs(start))
     if (typeof end === "number") {
-      end = Math.round(Math.abs(end))
+      end = round(abs(end))
     } else { end = start }
     const { newNode } = List
     let index = 0
