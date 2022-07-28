@@ -3,6 +3,7 @@
 /** @typedef {(node: Node, index: number, list: List) => boolean} callback */
 
 const { iterator } = Symbol
+const { isArray } = Array
 
 class Node {
   /** @type {Node} */
@@ -125,7 +126,7 @@ export default class List {
   }
   /** @param {Array} arr */
   fromArray(arr) {
-    if (!Array.isArray(arr)) return this
+    if (!isArray(arr)) return this
     this.clear()
     let head = new Node(), last = head
     arr.forEach((value) => (last = last.node = new Node(value)))
@@ -145,10 +146,10 @@ export default class List {
   removeFromIndex(index) {
     if (this.isEmpty() || index < 0) return null
     if (index === 0) return this.shift()
-    let i_ = 0
+    let i = 0
     let prev = this.node
     for (const node of this) {
-      if (index === i_++) {
+      if (index === i++) {
         prev.node = node.node
         node.node = null
         return node
@@ -305,7 +306,7 @@ export default class List {
   }
   print() { return this.each(console.log) }
   toString() {
-    let value = ""
+    let value = "empty"
     if (!this.isEmpty()) {
       value = ""
       let i = 0
@@ -324,7 +325,7 @@ export default class List {
    * @param {List | Array} others
    */
   static assign(list, ...others) {
-    if (Array.isArray(list)) list = List.fromArray(list)
+    if (isArray(list)) list = List.fromArray(list)
     if (!List.isList(list)) {
       throw new TypeError("Invalid arguments. Reqruired list objects")
     }
@@ -333,7 +334,7 @@ export default class List {
     let head
     while (index--) {
       const other = others[index]
-      if (!(List.isList(other) || Array.isArray(other))) continue
+      if (!(List.isList(other) || isArray(other))) continue
       if (other.isEmpty()) continue
       let h = null
       let l = null
