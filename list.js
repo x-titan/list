@@ -280,16 +280,6 @@ export default class List {
         this.node = this.node.node
       } else break
     }
-    let prev = this.node
-    let node = prev.node
-    while (node) {
-      if (!fn(node, index++, this)) {
-        prev.node = node.node
-      } else {
-        prev = node
-      }
-      node = node.node
-    }
     return this
   }
   trim() {
