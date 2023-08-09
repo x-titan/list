@@ -4,7 +4,7 @@
 
 const { iterator } = Symbol
 const { isArray } = Array
-const {abs,round} = Math
+const { abs, round } = Math
 
 class Node {
   /** @type {Node} */
@@ -127,12 +127,9 @@ export default class List {
   }
   /** @param {Array} arr */
   fromArray(arr) {
-    if (!isArray(arr)) return this
+    if (!isArray(arr)) { throw new TypeError("Require Array") }
     this.clear()
-    let head = new Node(), last = head
-    arr.forEach((value) => (last = last.node = new Node(value)))
-    this.node = head.node
-    return this
+    this.assignArray(arr)
   }
   /** @return {Node | null} */
   findByValue(value) {
@@ -234,6 +231,13 @@ export default class List {
       else head = n
       last = n
     }
+    this.push(head)
+    return this
+  }
+  assignArray(arr) {
+    if (!isArray(arr)) { throw new TypeError("Require Array") }
+    let head = new Node(), last = head
+    arr.forEach((value) => (last = last.node = new Node(value)))
     this.push(head)
     return this
   }
