@@ -130,6 +130,7 @@ export default class List {
     if (!isArray(arr)) { throw new TypeError("Require Array") }
     this.clear()
     this.assignArray(arr)
+    return this
   }
   /** @return {Node | null} */
   findByValue(value) {
@@ -215,6 +216,7 @@ export default class List {
   }
   /** @param {List} list */
   assign(list) {
+    if(isArray(list)) return this.assignArray(list)
     if (!List.isList(list)) {
       throw new TypeError(
         "First argument is not a List. "
