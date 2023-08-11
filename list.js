@@ -238,9 +238,15 @@ export default class List {
   }
   assignArray(arr) {
     if (!isArray(arr)) { throw new TypeError("Require Array") }
-    let head = new Node(), last = head
-    arr.forEach((value) => (last = last.node = new Node(value)))
-    this.push(head)
+    let head, last
+    arr.forEach((value, i) => {
+      if (i === 0) {
+        head = last = new Node(value)
+      } else {
+        last = last.node = new Node(value)
+      }
+    })
+    this.push(head.node)
     return this
   }
   /**
