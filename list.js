@@ -216,7 +216,7 @@ export default class List {
   }
   /** @param {List} list */
   assign(list) {
-    if(isArray(list)) return this.assignArray(list)
+    if (isArray(list)) return this.assignArray(list)
     if (!List.isList(list)) {
       throw new TypeError(
         "First argument is not a List. "
@@ -275,10 +275,21 @@ export default class List {
     }
     if (this.isEmpty()) return this
     let index = 0
-    while (this.node) {
-      if (!fn(this.node, index++, this)) {
-        this.node = this.node.node
-      } else break
+    let curr = this.node
+    let past
+    let lenght = 0
+    while (curr) {
+      if (fn(curr.value, index++, this)) {
+        past = curr
+        lenght++
+      } else {
+        if (lenght === 0) {
+          this.node = curr.node
+        } else {
+          past.node = curr.node
+        }
+      }
+      curr = curr.node
     }
     return this
   }
