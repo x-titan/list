@@ -285,15 +285,15 @@ export default class List {
     let past
     let lenght = 0
     while (curr) {
-      if (fn(curr.value, index++, this)) {
-        past = curr
-        lenght++
-      } else {
+      if (false === fn(curr.value, index++, this)) {
         if (lenght === 0) {
           this.node = curr.node
         } else {
           past.node = curr.node
         }
+      } else {
+        past = curr
+        lenght++
       }
       curr = curr.node
     }
