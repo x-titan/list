@@ -246,7 +246,7 @@ export default class List {
         last = last.node = new Node(value)
       }
     })
-    this.push(head.node)
+    this.push(head)
     return this
   }
   /**
