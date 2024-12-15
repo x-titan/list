@@ -35,7 +35,7 @@ export default class List {
   /** @return {Node} */
   get last() {
     let last = null
-    for (const node of this) last = node
+    for (var node of this) last = node
     return last
   }
   *[iterator]() {
@@ -64,7 +64,7 @@ export default class List {
   }
   shift() {
     if (!this.node) return null
-    const head = this.node
+    var head = this.node
     this.node = head.node
     head.node = null
     return head
@@ -89,7 +89,7 @@ export default class List {
    */
   each(fn, stoppable = false) {
     let index = 0
-    for (const node of this) {
+    for (var node of this) {
       if (
         fn(node, index++, this) === false
         && stoppable === true
@@ -100,11 +100,11 @@ export default class List {
   /** @param {Node} node */
   hasNode(value) {
     if (!List.isNode(value)) return false
-    for (const node of this) if (node === value) return true
+    for (var node of this) if (node === value) return true
     return false
   }
   has(value) {
-    for (const node of this) if (node.value === value) return true
+    for (var node of this) if (node.value === value) return true
     return false
   }
   clear() { this.node = null; return this }
@@ -121,8 +121,8 @@ export default class List {
     return this
   }
   toArray() {
-    const arr = []
-    for (const node of this) arr.push(node.value)
+    var arr = []
+    for (var node of this) arr.push(node.value)
     return arr
   }
   /** @param {Array} arr */
@@ -135,7 +135,7 @@ export default class List {
   /** @return {Node | null} */
   findByValue(value) {
     if (this.isEmpty()) return
-    for (const node of this) if (node.value === value) return node
+    for (var node of this) if (node.value === value) return node
     return null
   }
   /**
@@ -147,7 +147,7 @@ export default class List {
     if (index === 0) return this.shift()
     let i = 0
     let prev = this.node
-    for (const node of this) {
+    for (var node of this) {
       if (index === i++) {
         prev.node = node.node
         node.node = null
@@ -162,7 +162,7 @@ export default class List {
     if (this.isEmpty()) return null
     if (this.node.value === value) return this.shift()
     let prev = this.node
-    for (const node of this) {
+    for (var node of this) {
       if (node.value === value) {
         prev.node = node.node
         node.node = null
@@ -177,14 +177,14 @@ export default class List {
    * @param {number} count
    */
   splice(start, count) {
-    const list = new List()
+    var list = new List()
     if (this.isEmpty()) return list
     if (typeof start !== "number" || typeof count !== "number") {
       throw new TypeError("Unknown arguments")
     }
     start = round(abs(start)) - 1
     count = round(abs(count))
-    const end = start + count
+    var end = start + count
     let index = 0
     let curr = this.node
     if (start === 0) {
@@ -199,7 +199,7 @@ export default class List {
       }
     } else {
       let prev = this.node
-      for (const node of this) {
+      for (var node of this) {
         if (start === index) {
           list.node = node.node
           prev = node
@@ -224,11 +224,11 @@ export default class List {
       )
     }
     if (list.isEmpty()) return this
-    const { newNode } = List
+    var { newNode } = List
     let head = null
     let last = null
-    for (const node of list) {
-      const n = newNode(node)
+    for (var node of list) {
+      var n = newNode(node)
       if (head) last.node = n
       else head = n
       last = n
@@ -254,7 +254,7 @@ export default class List {
    * @param {number} end
    */
   slice(start, end) {
-    const list = new List()
+    var list = new List()
     if (this.isEmpty()) return list
     if (typeof start !== "number") {
       throw new TypeError("Unknown arguments")
@@ -263,9 +263,9 @@ export default class List {
     if (typeof end === "number") {
       end = round(abs(end))
     } else { end = start }
-    const { newNode } = List
+    var { newNode } = List
     let index = 0
-    for (const node of this) {
+    for (var node of this) {
       if (start <= index && index <= end) {
         list.push(newNode(node))
       }
@@ -304,13 +304,13 @@ export default class List {
     return this.filter((node) => (node !== undefined && node !== null))
   }
   clone() {
-    const list = new List
+    var list = new List
     if (this.isEmpty()) return list
-    const { newNode } = List
+    var { newNode } = List
     let head = null
     let last = null
-    for (const node of this) {
-      const n = newNode(node)
+    for (var node of this) {
+      var n = newNode(node)
       if (head) last.node = n
       else head = n
       last = n
@@ -324,7 +324,7 @@ export default class List {
     if (!this.isEmpty()) {
       value = ""
       let i = 0
-      for (const node of this) {
+      for (var node of this) {
         if (i !== 0) value += ","
         value += node.toString()
         if (i++ === 2) break
@@ -343,17 +343,17 @@ export default class List {
     if (!List.isList(list)) {
       throw new TypeError("Invalid arguments. Reqruired list objects")
     }
-    const { newNode } = List
+    var { newNode } = List
     let index = others.length
     let head
     while (index--) {
-      const other = others[index]
+      var other = others[index]
       if (!(List.isList(other) || isArray(other))) continue
       if (other.isEmpty()) continue
       let h = null
       let l = null
-      for (const node of other) {
-        const n = newNode(node)
+      for (var node of other) {
+        var n = newNode(node)
         if (h) l.node = n
         else h = n
         l = n
