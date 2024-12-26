@@ -1,9 +1,9 @@
 # Data Structures Library: List, Queue, and Stack
 
 _Read this in other languages:_
-[_Русский_](./doc/README.ru-RU.md)
+[_Русский_](/doc/README.ru-RU.md)
 
-This library provides implementations of essential data structures: **Linked List (List)**, **Queue**, and **Stack**. Each is exported as a function-class for convenient use.
+This library provides implementations of essential data structures: [**Linked List (List)**][list], [**Queue**][queue], and [**Stack**][stack]. Each is exported as a function-class for convenient use.
 
 ---
 
@@ -19,7 +19,7 @@ npm install xtitan-list
 
 ## Usage
 
-### **List**
+### [**List**][list]
 The `List` implements most of the methods of JavaScript arrays, making it easy and intuitive to use.
 
 #### Supported Methods:
@@ -53,7 +53,7 @@ console.log(list.indexOf(2)); // 1
 
 ---
 
-### **Queue**
+### [**Queue**][queue]
 A Queue is a data structure that operates on the **FIFO** principle (First In, First Out).
 
 #### Supported Methods:
@@ -76,7 +76,7 @@ console.log(queue.dequeue()); // 'B'
 
 ---
 
-### **Stack**
+### [**Stack**][stack]
 A Stack is a data structure that operates on the **LIFO** principle (Last In, First Out).
 
 #### Supported Methods:
@@ -108,3 +108,7 @@ console.log(stack.pop()); // 'X'
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+[list]: /src/list.js
+[queue]: /src/queue.js
+[stack]: /src/stack.js

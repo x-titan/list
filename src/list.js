@@ -2,7 +2,11 @@ import Collection from "./collection.js"
 import Node from "./node.js"
 
 /**
+ * @class
  * @extends Collection
+ * 
+ * @template T
+ * @param {T[] | List<T> | Queue<T> | Stack<T>} options
  */
 export default function List(options) {
   if (!(this instanceof List)) {
@@ -12,17 +16,10 @@ export default function List(options) {
   Collection.call(this, options)
 }
 
-function forEachCall(array, method, thisArg) {
-  for (let i = 0; i < array.length; i++) {
-    method.call(thisArg, array[i])
-  }
-  return thisArg
-}
-
 const proto = {
   push(element) {
     if (arguments.length > 1) {
-      element = Collection.arrayToNodes(arguments).head
+      element = Collection.toCollectionNodes(arguments).head
     } else {
       element = new Node(element)
     }
@@ -72,33 +69,6 @@ const proto = {
     return head.data
   },
 
-  concat(collection) {
-    if (collection instanceof Collection) {
-      this.tail.next = collection.head
-      return this
-    }
-
-    if (typeof collection[Symbol.iterator] === "function") {
-      return this.fromArray(collection)
-    }
-
-    throw new TypeError('Unexpexted collection type. Argument must be iterable or "Collection".')
-  },
-
-  find({ element, callback }) {
-    for (var node of this.nodes) {
-      if (callback && callback(node.data)) {
-        return node
-      }
-
-      if (node.data === element) {
-        return node
-      }
-    }
-
-    return null
-  },
-
   indexOf(element) {
     var index = 0
 
@@ -129,6 +99,33 @@ const proto = {
     return null
   },
 
+  concat(collection) {
+    if (collection instanceof Collection) {
+      this.tail.next = collection.head
+      return this
+    }
+
+    if (typeof collection[Symbol.iterator] === "function") {
+      return this.fromArray(collection)
+    }
+
+    throw new TypeError('Unexpexted collection type. Argument must be iterable or "Collection".')
+  },
+
+  findNode({ element, callback }) {
+    for (var node of this.nodes) {
+      if (callback && callback(node.data)) {
+        return node
+      }
+
+      if (node.data === element) {
+        return node
+      }
+    }
+
+    return null
+  },
+
   splice(index, count, ...insertElements) {
     var removedElements = []
 
@@ -151,17 +148,17 @@ const proto = {
     return removedElements
   },
 
-  addAt(index, ...elements) {
+  addAt(index, ...insertElements) {
     if (!this.head && insertElements.length > 0) {
       return this.fromArray(insertElements)
     }
 
-    var arrayToNodes = Collection.arrayToNodes(elements)
+    var collectionNodes = Collection.toCollectionNodes(insertElements)
     var curr
 
     if (index === 0 || !this.head) {
-      arrayToNodes.tail.next = this.head
-      this.head = arrayToNodes.head
+      collectionNodes.tail.next = this.head
+      this.head = collectionNodes.head
 
       return this
     }
@@ -169,14 +166,14 @@ const proto = {
     for (curr of this.nodes) {
       if (index-- === 1) {
         var nextNode = curr.next
-        curr.next = arrayToNodes.head
-        arrayToNodes.tail.next = nextNode
+        curr.next = collectionNodes.head
+        collectionNodes.tail.next = nextNode
 
         return this
       }
     }
 
-    curr.next = arrayToNodes.head
+    curr.next = collectionNodes.head
 
     return this
   },
@@ -228,7 +225,4 @@ const proto = {
   }
 }
 
-List.prototype = Object.create(Collection.prototype)
-Object.assign(List.prototype, proto)
-List.prototype.constructor = List
-List.toString = Collection.toString
+inherit(List, Collection, proto)

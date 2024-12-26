@@ -1,5 +1,11 @@
 import Node from "./node.js"
 
+/**
+ * @class
+ * 
+ * @template T
+ * @param {T[] | Collection<T>} options
+ */
 export default function Collection(options) {
   if (!(this instanceof Collection)) {
     return new Collection(options)
@@ -7,7 +13,10 @@ export default function Collection(options) {
 
   /** @type {Node} */
   this._head = null
-  this.options = options || {}
+
+  if (Array.isArray(options) || options instanceof Collection) {
+    this.head = Collection.toCollectionNodes(options).head
+  }
 }
 
 const proto = {
@@ -87,20 +96,6 @@ const proto = {
   },
 
   /**
-   * @param { (value: any, index: number, thisArg: this) => any } callback
-   * @param {{ }} [options]
-   */
-  forEach(callback, options) {
-    var index = 0
-
-    for (var element of this) {
-      callback(element, index++, this)
-    }
-
-    return this
-  },
-
-  /**
    * @param {{ }} [options]
    * @returns {Collection}
    */
@@ -123,6 +118,20 @@ const proto = {
     return clone
   },
 
+  /**
+   * @param {(value: T, index: number, thisArg: this) => T } callback
+   * @param {{ }} [options]
+   */
+  forEach(callback, options) {
+    var index = 0
+
+    for (var element of this) {
+      callback(element, index++, this)
+    }
+
+    return this
+  },
+
   toArray() {
     var array = []
 
@@ -138,7 +147,7 @@ const proto = {
       throw new TypeError("Unexpected argument parameter. Argument must be iterable.")
     }
 
-    var nodes = Collection.arrayToNodes(array)
+    var nodes = Collection.toCollectionNodes(array)
 
     if (!this.head) {
       this.head = nodes.head
@@ -150,7 +159,7 @@ const proto = {
   },
 
   /**
-   * @param { (value: any, index: number, thisArg: any[]) => any } callback
+   * @param {(value: T, index: number, thisArg: T[]) => T | string } callback
    */
   log(callback) {
     var array = this.toArray()
@@ -175,12 +184,16 @@ Collection.prototype.constructor = Collection;
 
 Collection.toString = Node.toString
 
-Collection.arrayToNodes = function (array) {
+Collection.toCollectionNodes = function (elementList) {
+  if (!(elementList && (typeof elementList[Symbol.iterator] !== "function"))) {
+    throw new TypeError("Unexpected argument. Argument must be Iterable with [Symbol.iterator].")
+  }
+
   var head = null
   var tail = null
   var length = 0
 
-  for (var element of array) {
+  for (var element of elementList) {
     var node = new Node(element)
     length++
 
@@ -198,7 +211,7 @@ Collection.arrayToNodes = function (array) {
 
 Collection.fromArray = function (array, options) {
   var collection = new this.constructor(options)
-  collection.head = this.arrayToNodes(array).head
+  collection.head = this.toCollectionNodes(array).head
 
   return collection
 }

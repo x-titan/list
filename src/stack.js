@@ -1,8 +1,13 @@
 import Collection from "./collection.js"
 import List from "./list.js"
+import Queue from "./queue.js"
 
 /**
+ * @class
  * @extends Collection
+ * 
+ * @template T
+ * @param {T[] | List<T> | Queue<T> | Stack<T>} options
  */
 export default function Stack(options) {
   if (!(this instanceof Stack)) {
@@ -12,13 +17,9 @@ export default function Stack(options) {
   Collection.call(this, options)
 }
 
-
 const proto = {
   push: List.prototype.unshift,
   pop: List.prototype.shift,
 }
 
-Stack.prototype = Object.create(Collection.prototype)
-Object.assign(Stack.prototype, proto)
-Stack.prototype.constructor = Stack
-Stack.toString = Collection.toString
+inherit(Stack, Collection, proto)

@@ -1,13 +1,15 @@
 /**
- * @class Node
- * @property {Node} next
+ * @template T
  */
 export default class Node {
 
-  /** @type {Node} */
+  /** @type {Node<T>} */
   _next
 
-  /** @param {Node} node */
+  /**
+   * @param {T} data
+   * @param {Node<T>} node 
+   */
   constructor(data, node = null) {
     this.data = data
     this.next = node
@@ -16,11 +18,17 @@ export default class Node {
   set next(node) {
     if (Node.isNode(node) || !node) {
       this._next = (node ?? null)
+    } else {
+      throw new TypeError("next must be a Node or null")
     }
   }
 
   get next() { return (this._next ?? null) }
 
+  /**
+   * @param {Function} callback
+   * @return {string}
+   */
   toString(callback) {
     return callback ? callback(this.data) : `${this.data}`
   }
