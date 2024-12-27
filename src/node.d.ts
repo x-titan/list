@@ -15,4 +15,8 @@ export default class Node<T> {
   constructor(data: T, next?: Node<T> | null)
 
   toString(): string
+
+  static isNode<U>(value: unknown): value is Node<U>
+
+  static toString(): string
 }

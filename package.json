@@ -1,20 +1,22 @@
 {
   "name": "xtitan-list",
-  "version": "1.0.1",
-  "main": "index.js",
+  "author": "Aset Telmanov",
+  "version": "1.0.2",
   "type": "module",
+  "main": "index.js",
+  "types": "",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "test": "node index"
+    "start": "node index",
+    "test": "node test/index"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/x-titan/list.git"
   },
   "keywords": [],
-  "author": "Aset Telmanov",
   "license": "MIT",
   "description": "This library provides implementations of essential data structures: Linked List (List), Queue, and Stack. Each is exported as a function-class for convenient use."
 }

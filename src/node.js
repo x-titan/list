@@ -1,3 +1,5 @@
+import { isDefined } from "./utils"
+
 /**
  * @template T
  */
@@ -16,11 +18,11 @@ export default class Node {
   }
 
   set next(node) {
-    if (Node.isNode(node) || !node) {
-      this._next = (node ?? null)
-    } else {
-      throw new TypeError("next must be a Node or null")
+    if (Node.isNode(node) || !isDefined(node)) {
+      return this._next = (node ?? null)
     }
+
+    throw new TypeError("next must be a Node or null")
   }
 
   get next() { return (this._next ?? null) }

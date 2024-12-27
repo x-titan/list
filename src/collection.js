@@ -1,4 +1,5 @@
 import Node from "./node.js"
+import { isDefined, isFunction, isIterable } from "./utils.js"
 
 /**
  * @class
@@ -14,8 +15,8 @@ export default function Collection(options) {
   /** @type {Node} */
   this._head = null
 
-  if (Array.isArray(options) || options instanceof Collection) {
-    this.head = Collection.toCollectionNodes(options).head
+  if (isIterable(options)) {
+    this.head = toCollectionNodes(options).head
   }
 }
 
@@ -24,7 +25,7 @@ const proto = {
   get head() { return (this._head ?? null) },
 
   set head(node) {
-    if (Node.isNode(node) || !node) {
+    if (Node.isNode(node) || !isDefined(node)) {
       this._head = (node ?? null);
     } else {
       throw new TypeError("head must be a Node or null")
@@ -40,6 +41,7 @@ const proto = {
     while (curr.next) {
       curr = curr.next
     }
+
     return curr
   },
 
@@ -55,9 +57,8 @@ const proto = {
     return index
   },
 
-  /**
-   * Get Node iterator
-   */
+
+  // Get Node iterator
   get nodes() {
     var collection = this
 
@@ -95,10 +96,6 @@ const proto = {
     return this
   },
 
-  /**
-   * @param {{ }} [options]
-   * @returns {Collection}
-   */
   clone(options) {
     var clone = new this.constructor(options || this.options)
     var last = null
@@ -143,16 +140,16 @@ const proto = {
   },
 
   fromArray(array) {
-    if (typeof array[Symbol.iterator] !== "function") {
+    if (!isIterable(array)) {
       throw new TypeError("Unexpected argument parameter. Argument must be iterable.")
     }
 
-    var nodes = Collection.toCollectionNodes(array)
+    var { head } = toCollectionNodes(array)
 
     if (!this.head) {
-      this.head = nodes.head
+      this.head = head
     } else {
-      this.tail.next = nodes.head
+      this.tail.next = head
     }
 
     return this
@@ -164,7 +161,7 @@ const proto = {
   log(callback) {
     var array = this.toArray()
 
-    if (callback) {
+    if (isFunction(callback)) {
       array = array.map(callback)
     }
 
@@ -179,13 +176,8 @@ const proto = {
 
 }
 
-Collection.prototype = proto;
-Collection.prototype.constructor = Collection;
-
-Collection.toString = Node.toString
-
-Collection.toCollectionNodes = function (elementList) {
-  if (!(elementList && (typeof elementList[Symbol.iterator] !== "function"))) {
+function toCollectionNodes(elementList) {
+  if (!isIterable(elementList)) {
     throw new TypeError("Unexpected argument. Argument must be Iterable with [Symbol.iterator].")
   }
 
@@ -209,9 +201,19 @@ Collection.toCollectionNodes = function (elementList) {
   return { head, tail, length }
 }
 
-Collection.fromArray = function (array, options) {
+function from(array, options) {
   var collection = new this.constructor(options)
   collection.head = this.toCollectionNodes(array).head
 
   return collection
 }
+
+Object.assign(Collection, {
+  prototype: proto,
+  toString: Node.toString,
+  from,
+  toCollectionNodes,
+  isIterable,
+})
+
+Collection.prototype.constructor = Collection

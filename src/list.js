@@ -1,5 +1,6 @@
 import Collection from "./collection.js"
 import Node from "./node.js"
+import { inherit, isFunction, isIterable, isNumber } from "./utils.js"
 
 /**
  * @class
@@ -17,17 +18,15 @@ export default function List(options) {
 }
 
 const proto = {
-  push(element) {
-    if (arguments.length > 1) {
-      element = Collection.toCollectionNodes(arguments).head
-    } else {
-      element = new Node(element)
-    }
+  push(...elements) {
+    var { head, length } = Collection.toCollectionNodes(elements)
 
-    if (!this.head) {
-      this.head = element
-    } else {
-      this.tail.next = element
+    if (length > 0) {
+      if (!this.head) {
+        this.head = head
+      } else {
+        this.tail.next = head
+      }
     }
 
     return this
@@ -53,8 +52,14 @@ const proto = {
     return last.data
   },
 
-  unshift(element) {
-    this.head = new Node(element, this.head)
+  unshift(...elements) {
+    var { head, tail, length } = Collection.toCollectionNodes(elements)
+
+    if (length > 0) {
+      tail.next = this.head || null
+      this.head = head
+    }
+
     return this
   },
 
@@ -80,13 +85,13 @@ const proto = {
     return -1
   },
 
-  /**
-   * Get element by index number. Index must be positive number
-   * @param {number} index
-   */
   at(index) {
+    if (!isNumber(index)) {
+      throw new TypeError("The Index must be number and will more or equal to Zero [0].")
+    }
+
     if (index < 0) {
-      throw new RangeError("Out of Range index")
+      throw new RangeError("Out of Range Index. Index must be more more or equal to Zero [0]")
     }
 
     var i = 0
@@ -100,12 +105,7 @@ const proto = {
   },
 
   concat(collection) {
-    if (collection instanceof Collection) {
-      this.tail.next = collection.head
-      return this
-    }
-
-    if (typeof collection[Symbol.iterator] === "function") {
+    if (isIterable(collection)) {
       return this.fromArray(collection)
     }
 
@@ -114,7 +114,7 @@ const proto = {
 
   findNode({ element, callback }) {
     for (var node of this.nodes) {
-      if (callback && callback(node.data)) {
+      if (isFunction(callback) && callback(node.data)) {
         return node
       }
 
@@ -127,38 +127,45 @@ const proto = {
   },
 
   splice(index, count, ...insertElements) {
+    if (!isNumber(index) || !isNumber(count)) {
+      throw new TypeError("Unexprected argument. First two arguments must be number. Expect: .splice(number, number, ...insertElements?)")
+    } 
+
     var removedElements = []
 
     if (!this.head) {
-      if (insertElements.length > 0) {
-        this.fromArray(call, insertElements)
-      }
+      this.unshift(...insertElements)
 
       return removedElements
     }
 
-    if (count > 0) {
-      removedElements.push(...this.removeAt(index, count))
-    }
+    removedElements.concat(this.removeAt(index, count))
 
-    if (insertElements.length > 0) {
-      this.addAt(index, ...insertElements)
-    }
+    this.addAt(index, ...insertElements)
 
     return removedElements
   },
 
   addAt(index, ...insertElements) {
-    if (!this.head && insertElements.length > 0) {
-      return this.fromArray(insertElements)
+    if (!isNumber(index)) {
+      throw new TypeError("Unexprected argument. The Index must be number.")
+    } 
+
+    if (insertElements.length <= 0) {
+      return this
     }
 
-    var collectionNodes = Collection.toCollectionNodes(insertElements)
+    if (!this.head && insertElements.length > 0) {
+      return this.unshift(...insertElements)
+    }
+
+    var { head, tail, length } = Collection.toCollectionNodes(insertElements)
     var curr
 
+
     if (index === 0 || !this.head) {
-      collectionNodes.tail.next = this.head
-      this.head = collectionNodes.head
+      tail.next = this.head
+      this.head = head
 
       return this
     }
@@ -166,22 +173,26 @@ const proto = {
     for (curr of this.nodes) {
       if (index-- === 1) {
         var nextNode = curr.next
-        curr.next = collectionNodes.head
-        collectionNodes.tail.next = nextNode
+        curr.next = head
+        tail.next = nextNode
 
         return this
       }
     }
 
-    curr.next = collectionNodes.head
+    curr.next = head
 
     return this
   },
 
   removeAt(index, count) {
+    if (index < 0 || count < 0) {
+      throw new RangeError("Out of range. Index must be cant be less Zero [0].")
+    }
+
     var removedElements = []
 
-    if (!this.head) return removedElements
+    if (!this.head || count <= 0) return removedElements
 
     if (index === 0) {
       while (count--) removedElements.push(this.shift(this))
@@ -204,14 +215,14 @@ const proto = {
       }
     }
 
-    return removedElements
+    return new this.constructor(removedElements)
   },
 
-  sort(comparator) { },
+  sort(comparator) { throw new Error("sort() method not implemented.") },
 
-  reverse(comparator) { },
+  reverse(comparator) { throw new Error("reverse() method not implemented.") },
 
-  filter(comparator) { },
+  filter(comparator) { throw new Error("filter() method not implemented.") },
 
   /** @return {Node | null} */
   getNodeByElement(element) {

@@ -1,6 +1,7 @@
 import Collection from "./collection.js"
 import List from "./list.js"
 import Queue from "./queue.js"
+import { inherit } from "./utils.js"
 
 /**
  * @class
@@ -18,7 +19,11 @@ export default function Stack(options) {
 }
 
 const proto = {
-  push: List.prototype.unshift,
+  push(...elements) {
+    List.prototype.unshift.apply(this, elements.reverse())
+
+    return this
+  },
   pop: List.prototype.shift,
 }
 

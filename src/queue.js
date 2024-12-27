@@ -1,7 +1,7 @@
 import Collection from "./collection.js"
 import List from "./list.js"
 import Stack from "./stack.js"
-import inherit from "./utils.js"
+import { inherit } from "./utils.js"
 
 /**
  * @class
