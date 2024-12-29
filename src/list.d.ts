@@ -2,6 +2,8 @@ import Collection from "./collection.js"
 import Node from "./node.js"
 
 export default class List<T> extends Collection<T> {
+  get self(): this | undefined
+
   push<T>(element: T): this
 
   unshift<T>(element: T): this

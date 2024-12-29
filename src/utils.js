@@ -36,6 +36,11 @@ export function isNumber(value) {
   return ((typeof value) === "number") && isFinite(value)
 }
 
+/** @return {value is string} */
+export function isString(value) {
+  return ((typeof value) === "string")
+}
+
 /** @return {value is Iterable} */
 export function isIterable(value) {
   return isDefined(value) && isFunction(value[Symbol.iterator])

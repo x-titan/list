@@ -1,6 +1,31 @@
 import Collection from "./collection.js"
 import Node from "./node.js"
-import { inherit, isFunction, isIterable, isNumber } from "./utils.js"
+import {
+  inherit,
+  isDefined,
+  isFunction,
+  isIterable,
+  isNumber,
+  isString,
+} from "./utils.js"
+
+const { get } = Reflect
+
+function proxyIt(target) {
+  return new Proxy(target, {
+    get(collection, property) {
+      if (isString(property) && isNumber(+property)) {
+        return collection.at(+property)
+      }
+
+      if (property === "self") {
+        return target
+      }
+
+      return get(collection, property)
+    }
+  })
+}
 
 /**
  * @class
@@ -15,6 +40,10 @@ export default function List(options) {
   }
 
   Collection.call(this, options)
+
+  if (isDefined(options) && options.useProxy === true) {
+    return proxyIt(this)
+  }
 }
 
 const proto = {
@@ -97,8 +126,7 @@ const proto = {
     var i = 0
 
     for (var element of this) {
-      if (i == index) { return element }
-      i++
+      if (i++ == index) { return element }
     }
 
     return null
@@ -129,7 +157,7 @@ const proto = {
   splice(index, count, ...insertElements) {
     if (!isNumber(index) || !isNumber(count)) {
       throw new TypeError("Unexprected argument. First two arguments must be number. Expect: .splice(number, number, ...insertElements?)")
-    } 
+    }
 
     var removedElements = []
 
@@ -149,7 +177,7 @@ const proto = {
   addAt(index, ...insertElements) {
     if (!isNumber(index)) {
       throw new TypeError("Unexprected argument. The Index must be number.")
-    } 
+    }
 
     if (insertElements.length <= 0) {
       return this

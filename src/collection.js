@@ -1,5 +1,9 @@
 import Node from "./node.js"
-import { isDefined, isFunction, isIterable } from "./utils.js"
+import {
+  isDefined,
+  isFunction,
+  isIterable,
+} from "./utils.js"
 
 /**
  * @class
