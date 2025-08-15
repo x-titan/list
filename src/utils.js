@@ -18,7 +18,7 @@ export function inherit(Child, Parent, proto = Child.prototype || {}) {
 
 /** @return {value is any} */
 export function isDefined(value) {
-  return (value !== null) && (value !== undefined)
+  return (value != null)
 }
 
 /** @return {value is number} */
