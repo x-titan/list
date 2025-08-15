@@ -206,7 +206,7 @@ function toCollectionNodes(elementList) {
 }
 
 function from(array, options) {
-  var collection = new this.constructor(options)
+  var collection = new this(options)
   collection.head = this.toCollectionNodes(array).head
 
   return collection
