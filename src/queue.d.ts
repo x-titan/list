@@ -1,12 +1,15 @@
 import Collection from "./collection.js"
-import Node from "./node.js"
 
-export default class Queue<T> extends Collection<T> {
+declare function Queue<T>(...items: T[]): Queue<T>
+
+declare class Queue<T> extends Collection<T> {
   enqueue(element: T): this
 
   dequeue(): T
 
-  static from<U>(collection: U[] | Collection<U>) {
-    return new this(collection) as Queue<U>
-  }
+  static from<U>(items: U[]): Queue<U>
+
+  static of<U>(...items: U[]): Queue<U>
 }
+
+export default Queue

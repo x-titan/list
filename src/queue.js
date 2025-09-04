@@ -1,26 +1,23 @@
+"use strict"
+
 import Collection from "./collection.js"
 import List from "./list.js"
-import Stack from "./stack.js"
-import { inherit } from "./utils.js"
+import inherit from "./inherit.js"
 
 /**
  * @class
- * @extends Collection
+ * @extends Collection<T>
  * 
  * @template T
- * @param {T[] | List<T> | Queue<T> | Stack<T>} options
+ * @param {...T} items
  */
-export default function Queue(options) {
-  if (!(this instanceof Queue)) {
-    return new Queue(options)
-  }
-
-  Collection.call(this, options)
+export default function Queue(...items) {
+  if (!(this instanceof Queue)) 
+    return new Queue(...items)
+  Collection.apply(this, items)
 }
 
-const proto = {
+inherit(Queue, Collection, {
   enqueue: List.prototype.push,
   dequeue: List.prototype.shift,
-}
-
-inherit(Queue, Collection, proto)
+})

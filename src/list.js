@@ -1,69 +1,45 @@
+"use strict"
+
+import assert from "./assert.js"
 import Collection from "./collection.js"
+import inherit from "./inherit.js"
 import Node from "./node.js"
 import {
-  inherit,
-  isDefined,
   isFunction,
   isIterable,
-  isNumber,
-  isString,
-} from "./utils.js"
+  isUnsignedInteger,
+} from "./types.js"
 
-const { get } = Reflect
-
-function proxyIt(target) {
-  return new Proxy(target, {
-    get(collection, property) {
-      if (isString(property) && isNumber(+property)) {
-        return collection.at(+property)
-      }
-
-      if (property === "self") {
-        return target
-      }
-
-      return get(collection, property)
-    }
-  })
-}
 
 /**
  * @class
- * @extends Collection
+ * @extends Collection<T>
  * 
  * @template T
- * @param {T[] | List<T> | Queue<T> | Stack<T>} options
+ * @param {...T} items
  */
-export default function List(options) {
-  if (!(this instanceof List)) {
-    return new List(options)
-  }
-
-  Collection.call(this, options)
-
-  if (isDefined(options) && options.useProxy === true) {
-    return proxyIt(this)
-  }
+export default function List(...items) {
+  if (!(this instanceof List))
+    return new List(...items)
+  Collection.apply(this, items)
 }
 
-const proto = {
-  push(...elements) {
-    var { head, length } = Collection.toCollectionNodes(elements)
+inherit(List, Collection, {
+  /** @param  {...T} items */
+  push(...items) {
+    var next = Node.prepare(items).head
 
-    if (length > 0) {
-      if (!this.head) {
-        this.head = head
-      } else {
-        this.tail.next = head
-      }
-    }
-
+    if (next)
+      if (!this.head)
+        this.head = next;
+      else
+        this.tail.next = next;
     return this
   },
 
   pop() {
-    if (!this.head) return null
-
+    if (!this.head)
+      return null
     var curr = this.head
 
     if (!curr.next) {
@@ -71,197 +47,265 @@ const proto = {
       return curr.data
     }
 
-    while (curr.next.next) {
-      curr = curr.next
-    }
+    while (curr.next.next)
+      curr = curr.next;
 
     var last = curr.next
     curr.next = null
-
     return last.data
   },
 
-  unshift(...elements) {
-    var { head, tail, length } = Collection.toCollectionNodes(elements)
+  /** @param  {...T} items */
+  unshift(...items) {
+    var { head, tail } = Node.prepare(items)
 
-    if (length > 0) {
-      tail.next = this.head || null
+    if (head) {
+      tail.next = this.head
       this.head = head
     }
-
     return this
   },
 
   shift() {
-    if (!this.head) return null
-
+    if (!this.head)
+      return null
     var head = this.head
 
-    this.head = (head.next ?? null)
+    this.head = head.next
     head.next = null
-
     return head.data
   },
 
-  indexOf(element) {
-    var index = 0
+  indexOf(item) {
+    var index = -1
 
-    for (var curr of this) {
-      if (curr === element) return index
-      index++
+    for (let curr of this) {
+      index++;
+      if (curr === item)
+        return index
     }
-
     return -1
   },
 
+  /**
+   * @param {number} index
+   */
   at(index) {
-    if (!isNumber(index)) {
-      throw new TypeError("The Index must be number and will more or equal to Zero [0].")
-    }
-
-    if (index < 0) {
-      throw new RangeError("Out of Range Index. Index must be more more or equal to Zero [0]")
-    }
-
+    assert(isUnsignedInteger(index),
+      "Index must be more than Zero or equal to Zero [0].")
     var i = 0
 
-    for (var element of this) {
-      if (i++ == index) { return element }
-    }
-
+    for (let item of this)
+      if (i++ === index)
+        return item
     return null
   },
 
-  concat(collection) {
-    if (isIterable(collection)) {
-      return this.fromArray(collection)
-    }
+  /**
+   * @param {(value: T, index: number, thisArg: this) => T } callback
+   * @param {{ }} [options]
+   */
+  forEach(callback, options) {
+    assert(isFunction(callback),
+      "Argument callback must be function")
 
-    throw new TypeError('Unexpexted collection type. Argument must be iterable or "Collection".')
+    var index = 0
+
+    for (let element of this)
+      callback(element, index++, this)
+    return this
   },
 
-  findNode({ element, callback }) {
-    for (var node of this.nodes) {
-      if (isFunction(callback) && callback(node.data)) {
-        return node
-      }
+  /**
+   * @template U
+   * @param {Iterable<U> | Collection<U>} iterable
+   * @return {List<T | U>}
+   */
+  concat(iterable) {
+    assert(isIterable(iterable),
+      "iterable must be Array or instance of Collection.")
+    var next = Node.prepare(iterable).head
 
-      if (node.data === element) {
-        return node
-      }
+    if (this.isEmpty())
+      this.head = next
+    else
+      this.tail.next = next
+    return this
+  },
+
+  reverse() {
+    var node = this.head
+    var previous = null
+
+    while (node) {
+      var save = node.next
+      node.next = previous
+      previous = node
+      node = save
     }
 
+    this.head = previous
+    return this
+  },
+
+  /**
+   * @param { (value: T, index: number, thisArg: this) => boolean } predicate
+   */
+  find(predicate) {
+    assert(isFunction(predicate),
+      "predicate must be a function.")
+    var index = 0
+
+    for (let curr of this)
+      if (!!predicate(curr, index++, this))
+        return curr
     return null
   },
 
+  /**
+   * @param { (value: T, index: number, thisArg: this) => boolean } predicate
+   */
+  some(predicate) {
+    assert(isFunction(predicate),
+      "predicate must be a function.")
+    var index = 0
+
+    for (let curr of this)
+      if (predicate(curr, index++, this))
+        return true
+    return false
+  },
+
+  /**
+   * @param { (value: T, index: number, thisArg: this) => boolean } predicate
+   */
+  every(predicate) {
+    assert(isFunction(predicate),
+      "predicate must be a function.")
+
+    var index = 0
+    var pass = false
+
+    for (let curr of this)
+      if (!(pass = predicate(curr, index++, this)))
+        return false
+    return pass
+  },
+
+  /**
+   * @template U
+   * @param { (value: T, index: number) => U } callback
+   * @return {List<U>}
+   */
+  map(callback) {
+    assert(isFunction(callback),
+      "callback must be a function.")
+
+    var clone = new this.constructor()
+    clone.head = Node.prepare(this, callback, clone).head
+
+    return clone
+  },
+
+  /**
+   * @param { (value: T, nextValue: T) => (-1 | 0 | 1) } comparator
+   */
+  sort(comparator) {
+    assert(isFunction(comparator),
+      "comparator must be a function.")
+
+    if (!this.isEmpty())
+      bubbleSort(this, comparator)
+    return this
+  },
+
+  /**
+   * @param { (value: T, index: number, thisArg: this) => boolean } predicate
+   * @return {List<T>}
+   */
+  filter(predicate) {
+    assert(isFunction(predicate),
+      "predicate must be a function.")
+
+    var array = []
+    var index = 0
+
+    for (let item of this)
+      if (!!predicate(item, index++, this))
+        array.push(item)
+    return this.constructor.from(array)
+  },
+
+  //! Remake
   splice(index, count, ...insertElements) {
-    if (!isNumber(index) || !isNumber(count)) {
-      throw new TypeError("Unexprected argument. First two arguments must be number. Expect: .splice(number, number, ...insertElements?)")
-    }
-
+    assert(isUnsignedInteger(index) && isUnsignedInteger(count),
+      "Unexprected argument. First two arguments must be number. Expect: .splice(number, number, ...insertElements?)")
     var removedElements = []
 
     if (!this.head) {
       this.unshift(...insertElements)
-
-      return removedElements
+    } else {
+      removedElements.concat(this.removeAt(index, count))
+      this.addAt(index, ...insertElements)
     }
-
-    removedElements.concat(this.removeAt(index, count))
-
-    this.addAt(index, ...insertElements)
 
     return removedElements
   },
 
+  //! Remake
   addAt(index, ...insertElements) {
-    if (!isNumber(index)) {
-      throw new TypeError("Unexprected argument. The Index must be number.")
-    }
+    assert(isUnsignedInteger(index),
+      "Unexprected argument. The Index must be number.")
 
-    if (insertElements.length <= 0) {
+    if (insertElements.length == 0)
       return this
-    }
 
-    if (!this.head && insertElements.length > 0) {
+    if (!this.head || index == 0)
       return this.unshift(...insertElements)
-    }
 
-    var { head, tail, length } = Collection.toCollectionNodes(insertElements)
+    var { head, tail } = Collection.toCollectionNodes(insertElements)
     var curr
 
-
-    if (index === 0 || !this.head) {
-      tail.next = this.head
-      this.head = head
-
-      return this
-    }
-
     for (curr of this.nodes) {
-      if (index-- === 1) {
+      if (--index === 0) {
         var nextNode = curr.next
+
         curr.next = head
         tail.next = nextNode
-
         return this
       }
     }
-
     curr.next = head
-
     return this
   },
 
+  //! Remake
   removeAt(index, count) {
-    if (index < 0 || count < 0) {
-      throw new RangeError("Out of range. Index must be cant be less Zero [0].")
-    }
+    assert(isUnsignedInteger(index) && isUnsignedInteger(count),
+      "Out of range. Index must be cant be less Zero [0].")
 
     var removedElements = []
 
-    if (!this.head || count <= 0) return removedElements
+    if (!this.head || count == 0)
+      return removedElements
 
     if (index === 0) {
-      while (count--) removedElements.push(this.shift(this))
+      while (count--)
+        removedElements.push(this.shift(this))
       return removedElements
     }
 
-    var node
-
-    for (node of this.nodes) {
+    for (let node of this.nodes) {
       if (index-- === 1) {
         var clone = { head: node.next }
 
-        while (count--) {
+        while (count--)
           removedElements.push(proto.shift.call(clone))
-        }
 
         node.next = clone.head
-
         break
       }
     }
-
     return new this.constructor(removedElements)
   },
-
-  sort(comparator) { throw new Error("sort() method not implemented.") },
-
-  reverse(comparator) { throw new Error("reverse() method not implemented.") },
-
-  filter(comparator) { throw new Error("filter() method not implemented.") },
-
-  /** @return {Node | null} */
-  getNodeByElement(element) {
-    if (!this.head) return
-
-    for (var curr of this) {
-      if (curr === element) return node
-    }
-
-    return null
-  }
-}
-
-inherit(List, Collection, proto)
+})

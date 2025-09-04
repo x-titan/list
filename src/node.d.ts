@@ -18,5 +18,7 @@ export default class Node<T> {
 
   static isNode<U>(value: unknown): value is Node<U>
 
+  static prepare<U>(array: Iterable<U>): { head: ?Node<U>, tail: ?Node<U>, length: number }
+
   static toString(): string
 }

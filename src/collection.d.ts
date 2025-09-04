@@ -1,9 +1,8 @@
-import List from "./list.js"
 import Node from "./node.js"
-import Queue from "./queue.js"
-import Stack from "./stack.js"
 
-export default class Collection<T> {
+declare function Collection<T>(...items: T[]): Collection<T>
+
+declare class Collection<T> {
   head: Node<T> | null
 
   readonly tail: Node<T> | null
@@ -12,7 +11,7 @@ export default class Collection<T> {
 
   readonly nodes: { [Symbol.iterator](): Iterator<Node<T>> }
 
-  constructor(options?: T[] | Collection<T>)
+  constructor(...items?: T[] | Collection<T>)
 
   [Symbol.iterator](): Iterator<T>
 
@@ -24,8 +23,6 @@ export default class Collection<T> {
 
   clone(): this
 
-  forEach(callback: (value: T, index: number, thisArg: this) => T, options?: {} | null): this
-
   toArray(): T[]
 
   fromArray(array: T[]): this
@@ -34,11 +31,9 @@ export default class Collection<T> {
 
   toString(): string
 
-  static isIterable<U>(collection: unknown): collection is Iterable<U>
+  static from<U>(items: U[]): Collection<U>
 
-  static from<U>(collection: U[] | Collection<U>) {
-    return new this(collection) as Collection<U>
-  }
-
-  static toCollectionNodes<U>(elementList: U[] | Collection<U>): { head: Node<U> | null, tail: Node<U> | null, length: number }
+  static of<U>(...items: U[]): Collection<U>
 }
+
+export default Collection

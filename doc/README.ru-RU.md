@@ -106,6 +106,6 @@ console.log(stack.pop()); // 'X'
 
 Этот проект распространяется под лицензией MIT. Подробнее читайте в [LICENSE](./LICENSE).
 
-[list]: /src/list.js
-[queue]: /src/queue.js
-[stack]: /src/stack.js
+[list]: ../src/list.js
+[queue]: ../src/queue.js
+[stack]: ../src/stack.js

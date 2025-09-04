@@ -1,11 +1,15 @@
 import Collection from "./collection.js"
 
-export default class Stack<T> extends Collection<T> {
+declare function Stack<T>(...items: T[]): Stack<T>
+
+declare class Stack<T> extends Collection<T> {
   push(element: T): this
 
   pop(): T
 
-  static from<U>(collection: U[] | Collection<U>) {
-    return new this(collection) as Stack<U>
-  }
+  static from<U>(items: U[]): Stack<U>
+
+  static of<U>(...items: U[]): Stack<U>
 }
+
+export default Stack

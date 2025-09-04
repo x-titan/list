@@ -1,50 +1,49 @@
+"use strict"
+
+import assert from "./assert.js"
 import Node from "./node.js"
 import {
-  isDefined,
+  isEmpty,
   isFunction,
-  isIterable,
-} from "./utils.js"
+} from "./types.js"
 
 /**
  * @class
  * 
  * @template T
- * @param {T[] | Collection<T>} options
+ * @param {...T} items
  */
-export default function Collection(options) {
-  if (!(this instanceof Collection)) {
-    return new Collection(options)
-  }
+export default function Collection(...items) {
+  if (!(this instanceof Collection))
+    return new Collection(...items)
 
-  /** @type {Node} */
-  this._head = null
-
-  if (isIterable(options)) {
-    this.head = toCollectionNodes(options).head
-  }
+  if (items.length > 0)
+    this.head = Node.prepare(items).head
 }
 
-const proto = {
-  /** @type {Node} */
-  get head() { return (this._head ?? null) },
+const prototype = {
+  constructor: Collection,
+
+  /** @type {Node<T>} */
+  _head: null,
+
+  /** @type {Node<T>} */
+  get head() { return this._head },
 
   set head(node) {
-    if (Node.isNode(node) || !isDefined(node)) {
-      this._head = (node ?? null);
-    } else {
-      throw new TypeError("head must be a Node or null")
-    }
+    assert(Node.isNode(node) || isEmpty(node),
+      "head must be a Node or null")
+    this._head = (node ?? null);
   },
 
-  /** @type {Node} */
+  /** @type {Node<T>} */
   get tail() {
     var curr = this.head
 
-    if (!curr) return null
-
-    while (curr.next) {
-      curr = curr.next
-    }
+    if (!curr)
+      return null
+    while (curr.next)
+      curr = curr.next;
 
     return curr
   },
@@ -57,12 +56,18 @@ const proto = {
       curr = curr.next;
       index++
     }
-
     return index
   },
 
+  *[Symbol.iterator]() {
+    var curr = this.head
 
-  // Get Node iterator
+    while (curr) {
+      yield curr.data
+      curr = curr.next
+    }
+  },
+
   get nodes() {
     var collection = this
 
@@ -78,20 +83,11 @@ const proto = {
     }
   },
 
-  *[Symbol.iterator]() {
-    var curr = this.head
-
-    while (curr) {
-      yield curr.data
-      curr = curr.next
-    }
-  },
-
   isEmpty() { return !this.head },
 
   peek() {
-    if (!this.head) return null
-
+    if (!this.head)
+      return null
     return this.head.data
   },
 
@@ -100,63 +96,38 @@ const proto = {
     return this
   },
 
-  clone(options) {
-    var clone = new this.constructor(options || this.options)
-    var last = null
-
-    for (var data of this) {
-      var newNode = new Node(data);
-
-      if (!clone.head) {
-        clone.head = newNode
-      } else {
-        last.next = newNode
-      }
-
-      last = newNode;
-    }
-
-    return clone
-  },
-
   /**
-   * @param {(value: T, index: number, thisArg: this) => T } callback
-   * @param {{ }} [options]
+   * @return {this}
    */
-  forEach(callback, options) {
-    var index = 0
+  clone() {
+    var clone = new this.constructor()
 
-    for (var element of this) {
-      callback(element, index++, this)
-    }
-
-    return this
+    clone.head = Node.prepare(this).head
+    return clone
   },
 
   toArray() {
     var array = []
 
-    for (var element of this) {
+    for (let element of this)
       array.push(element)
-    }
-
     return array
   },
 
   fromArray(array) {
-    if (!isIterable(array)) {
-      throw new TypeError("Unexpected argument parameter. Argument must be iterable.")
-    }
+    assert(isIterable(array),
+      "Unexpected argument parameter. Argument must be iterable.")
+    var next = Node.prepare(array).head
 
-    var { head } = toCollectionNodes(array)
-
-    if (!this.head) {
-      this.head = head
-    } else {
-      this.tail.next = head
-    }
-
+    if (!this.head)
+      this.head = next
+    else
+      this.tail.next = next
     return this
+  },
+
+  toString() {
+    return `[${this.constructor.name} nodes:${this.length}]`
   },
 
   /**
@@ -165,59 +136,43 @@ const proto = {
   log(callback) {
     var array = this.toArray()
 
-    if (isFunction(callback)) {
+    if (isFunction(callback))
       array = array.map(callback)
-    }
 
-    console.table(this.toArray())
-
+    console.table(array)
     return this
   },
 
-  toString() {
-    return `[${this.constructor.name} nodes:${this.length}]`
-  },
-
 }
 
-function toCollectionNodes(elementList) {
-  if (!isIterable(elementList)) {
-    throw new TypeError("Unexpected argument. Argument must be Iterable with [Symbol.iterator].")
-  }
+/**
+ * @template T
+ * @param {Iterable<T>} items
+ * @param { (value: T, index: number, thisArg: thisArg) => T } [callback]
+ * @param {*} [thisArg]
+ */
+function from(items, callback, thisArg) {
+  var collection = new this()
+  var preparedNodes = Node.prepare.apply(Node, arguments)
+  collection.head = preparedNodes.head
 
-  var head = null
-  var tail = null
-  var length = 0
-
-  for (var element of elementList) {
-    var node = new Node(element)
-    length++
-
-    if (!head) {
-      head = node
-    } else {
-      tail.next = node
-    }
-
-    tail = node
-  }
-
-  return { head, tail, length }
+  return collection
 }
 
-function from(array, options) {
-  var collection = new this(options)
-  collection.head = this.toCollectionNodes(array).head
+/**
+ * @template T
+ * @param  {...T} items
+ */
+function of(...items) {
+  var collection = new this()
+  var preparedNodes = Node.prepare(items)
+  collection.head = preparedNodes.head
 
   return collection
 }
 
 Object.assign(Collection, {
-  prototype: proto,
-  toString: Node.toString,
+  prototype,
   from,
-  toCollectionNodes,
-  isIterable,
+  of,
 })
-
-Collection.prototype.constructor = Collection

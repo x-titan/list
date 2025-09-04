@@ -1,19 +1,8 @@
-/**
- * Sets up inheritance for a class.
- * 
- * @template T, U
- * @param {T} Child - The child class.
- * @param {U} Parent - The parent class.
- * @param {{ }} [proto]
- * @return {T & U} The child class with inheritance applied.
- */
-export function inherit(Child, Parent, proto = Child.prototype || {}) {
-  Child.prototype = Object.create(Parent.prototype)
-  Object.assign(Child.prototype, proto)
-  Child.prototype.constructor = Child
-  Child.prototype.super = Parent.prototype
+"use strict"
 
-  return Object.assign(Child, Parent)
+/** @return {value is void | null} */
+export function isEmpty(value) {
+  return (value == null)
 }
 
 /** @return {value is any} */
@@ -41,7 +30,18 @@ export function isObject(value) {
   return (value !== null) && ((typeof value) === "object")
 }
 
-/** @return {value is Iterable} */
+/**
+ * @template T
+ * @return {value is Iterable<T>}
+ */
 export function isIterable(value) {
   return isDefined(value) && isFunction(value[Symbol.iterator])
+}
+
+export function isInteger(value) {
+  return (isNumber(value) && ((value % 1) === 0))
+}
+
+export function isUnsignedInteger(value) {
+  return (isInteger(value) && (value >= 0))
 }

@@ -1,14 +1,16 @@
 import Collection from "./collection.js"
 import Node from "./node.js"
 
-export default class List<T> extends Collection<T> {
+declare function List<T>(...items: T[] | Collection<T>): List<T>
+
+declare class List<T> extends Collection<T> {
   get self(): this | undefined
 
   push<T>(element: T): this
 
-  unshift<T>(element: T): this
-
   pop(): T
+
+  unshift<T>(element: T): this
 
   shift(): T
 
@@ -18,6 +20,8 @@ export default class List<T> extends Collection<T> {
    * Get element by index number. Index must be positive number
    */
   at(index: number): T | null
+
+  forEach(callback: (value: T, index: number, thisArg: this) => T, options?: {} | null): this
 
   concat<U>(collection: Collection<U> | Array<U>): this
 
@@ -37,7 +41,9 @@ export default class List<T> extends Collection<T> {
 
   getNodeByElement(element: T): Node<T>
 
-  static from<U>(collection: U[] | Collection<U>) {
-    return new this(collection) as List<U>
-  }
+  static from<U>(items: U[]): List<U>
+
+  static of<U>(...items: U[]): List<U>
 }
+
+export default List
