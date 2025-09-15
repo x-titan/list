@@ -6,7 +6,3 @@ import Node from "./node.js"
 import LinkedList from "./linkedlist.js"
 
 export { Collection, List, Queue, Stack, Node, LinkedList }
-
-var a = List(1)
-a.push("")
-a.log()
