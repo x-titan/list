@@ -1,12 +1,14 @@
 {
   "name": "@x-titan/list",
   "author": "Aset Telmanov",
-  "version": "0.1.0",
-  "type": "module",
-  "main": "index.js",
+  "version": "0.3.0",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "start": "node index",
-    "test": "node test/index"
+    "dev": "nodemon",
+    "start": "node dist",
+    "build": "tsc"
   },
   "publishConfig": {
     "access": "public"
@@ -17,5 +19,10 @@
   },
   "keywords": [],
   "license": "MIT",
-  "description": "This library provides implementations of essential data structures: Linked List (List), Queue, and Stack. Each is exported as a function-class for convenient use."
+  "description": "This library provides implementations of essential data structures: Linked List (List), Queue, and Stack. Each is exported as a function-class for convenient use.",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
 }
