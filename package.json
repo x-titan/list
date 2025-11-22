@@ -1,12 +1,15 @@
 {
-  "name": "xtitan-list",
+  "name": "@x-titan/list",
   "author": "Aset Telmanov",
-  "version": "2.0.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index",
     "test": "node test/index"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
