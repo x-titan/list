@@ -9,7 +9,7 @@ export default class Stack<T> extends Collection<T> {
     let { head, tail } = Node.prepare(items.reverse())
 
     if (head) {
-      (tail as Node<any>).next = this.head
+      tail!.next = this.head
       this.head = head
     }
     return this

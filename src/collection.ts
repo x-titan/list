@@ -1,5 +1,9 @@
 import Node from "./node"
-import { assert, isFunction, isIterable } from "./utils"
+import {
+  assert,
+  isFunction,
+  isIterable,
+} from "./utils"
 
 export default class Collection<T> implements Iterable<T> {
   private _head: Node<T> | null = null
@@ -95,7 +99,7 @@ export default class Collection<T> implements Iterable<T> {
     if (!this.head)
       this.head = next
     else
-      (this.tail as Node<any>).next = next
+      this.tail!.next = next
     return this
   }
 

@@ -6,7 +6,6 @@ export function assert(
     throw new Error(message ?? "Unexpected assertion error")
 }
 
-
 assert.fail = function (
   message: string,
   base?: ErrorConstructor

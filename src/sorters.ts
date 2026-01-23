@@ -70,7 +70,7 @@ function merge<T>(
   b: Node<T> | null,
   cmp: (a: T, b: T) => number
 ): Node<T> | null {
-  const dummy = new Node<T>(null as any);
+  const dummy = new Node<T>(null!)
   let tail = dummy
 
   while (a && b) {

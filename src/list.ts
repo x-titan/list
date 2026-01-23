@@ -1,8 +1,20 @@
 import Collection from "./collection"
 import Node from "./node"
-import { bubbleSort } from "./sorters";
-import type { Comparator, ForEachIterator, Predicate } from "./types";
-import { assert, isFunction, isIterable, isUnsignedInteger } from "./utils"
+import {
+  bubbleSort,
+} from "./sorters"
+import {
+  assert,
+  isFunction,
+  isIterable,
+  isUnsignedInteger,
+} from "./utils"
+
+import type {
+  Comparator,
+  ForEachIterator,
+  Predicate,
+} from "./types"
 
 export default class List<T> extends Collection<T> {
   push(...items: T[]) {
@@ -10,9 +22,9 @@ export default class List<T> extends Collection<T> {
 
     if (next)
       if (!this.head)
-        this.head = next;
+        this.head = next
       else
-        (this.tail as Node<any>).next = next;
+        this.tail!.next = next
     return this
   }
 
@@ -26,8 +38,8 @@ export default class List<T> extends Collection<T> {
       return curr.data
     }
 
-    while ((curr.next as Node<any>).next)
-      curr = curr.next as Node<any>;
+    while (curr.next!.next)
+      curr = curr.next!
 
     let last = curr.next
     curr.next = null
