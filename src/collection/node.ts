@@ -1,21 +1,42 @@
-export default class Node<T = any> {
+export class Node<T = any> {
   public data: T
-  private _next: Node<T> | null = null
+  public next: Node<T> | null
 
   constructor(data: T, next = null) {
     this.data = data
     this.next = next
   }
+}
 
-  get next() { return this._next }
+export function prepare<T = any>(
+  iterable: Iterable<T>,
+  reversed = false
+) {
+  let head: Node<T> | null = null
+  let tail: Node<T> | null = null
+  let temp: Node<T>
+  let length = 0
 
-  set next(node: Node<T> | null) {
-    if (!Node.isNode(node) && (node != null))
-      throw new TypeError("next must be a Node or null")
-    this._next = (node ?? null)
+  for (const element of iterable) {
+    temp = new Node(element)
+
+    if (!head) {
+      head = temp
+      tail = temp
+    } else if (!reversed) {
+      tail!.next = temp
+      tail = temp
+    } else {
+      temp.next = head
+      head = temp
+    }
+
+    length++
   }
 
-  static isNode<U = any>(value: unknown): value is Node<U> {
-    return value instanceof Node
+  return {
+    head,
+    tail,
+    length,
   }
 }
