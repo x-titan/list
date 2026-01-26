@@ -30,12 +30,12 @@ export default class Node<T> {
     let length = 0
 
     for (const element of array) {
-      let node = new Node(element)
+      const node = new Node(element)
 
       if (!head)
         head = node
       else
-        (tail as Node<any>).next = node
+        tail!.next = node
 
       length++
       tail = node

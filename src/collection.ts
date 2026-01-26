@@ -76,8 +76,8 @@ export default class Collection<T> implements Iterable<T> {
   }
 
   clone(): this {
-    let ctor = this.constructor as typeof Collection
-    let clone = new ctor()
+    const ctor = this.constructor as typeof Collection
+    const clone = new ctor()
 
     clone.head = Node.prepare(this).head
     return clone as this

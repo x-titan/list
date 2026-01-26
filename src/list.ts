@@ -18,7 +18,7 @@ import type {
 
 export default class List<T> extends Collection<T> {
   push(...items: T[]) {
-    let next = Node.prepare(items).head
+    const next = Node.prepare(items).head
 
     if (next)
       if (!this.head)
@@ -41,13 +41,13 @@ export default class List<T> extends Collection<T> {
     while (curr.next!.next)
       curr = curr.next!
 
-    let last = curr.next
+    const last = curr.next!
     curr.next = null
-    return (last as Node<T>).data
+    return last.data
   }
 
   unshift(...items: T[]) {
-    let { head, tail } = Node.prepare(items)
+    const { head, tail } = Node.prepare(items)
 
     if (head) {
       (tail as Node<any>).next = this.head
@@ -59,8 +59,7 @@ export default class List<T> extends Collection<T> {
   shift() {
     if (!this.head)
       return null
-    let head = this.head
-
+    const head = this.head
     this.head = head.next
     head.next = null
     return head.data
@@ -103,12 +102,12 @@ export default class List<T> extends Collection<T> {
     assert(isIterable(iterable),
       "iterable must be Array or instance of Collection.")
 
-    let next = Node.prepare(iterable).head
+    const next = Node.prepare(iterable).head
 
     if (this.isEmpty())
       this.head = next
     else
-      (this.tail as Node<any>).next = next
+      this.tail!.next = next
     return this
   }
 
@@ -166,8 +165,8 @@ export default class List<T> extends Collection<T> {
     assert(isFunction(callback),
       "callback must be a function.")
 
-    let ctor = this.constructor as typeof List
-    let clone = new ctor()
+    const ctor = this.constructor as typeof List
+    const clone = new ctor()
     let head = null
     let tail = null
 
@@ -177,7 +176,7 @@ export default class List<T> extends Collection<T> {
       if (!head)
         head = node
       else
-        (tail as Node<any>).next = node
+        tail!.next = node
 
       tail = node
     }
@@ -199,8 +198,8 @@ export default class List<T> extends Collection<T> {
     assert(isFunction(predicate),
       "predicate must be a function.")
 
-    var array = []
-    var index = 0
+    const array = []
+    let index = 0
 
     for (let item of this)
       if (!!predicate(item, index++, this))
