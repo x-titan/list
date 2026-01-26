@@ -1,8 +1,8 @@
-import type Collection from "./collection"
-import Node from "./node"
-import type { Comparator } from "./types"
+import Node from "../collection/node"
+import type Collection from "../collection/collection"
+import type { Comparator } from "./types-extended"
 
-export function bubbleSort<T>(
+export function bubbleSort<T = any>(
   collection: Collection<T>,
   comparator: Comparator<T>
 ) {
@@ -28,7 +28,7 @@ export function bubbleSort<T>(
   return collection
 }
 
-export function mergeSort<T>(
+export function mergeSort<T = any>(
   collection: Collection<T>,
   comparator: Comparator<T>
 ) {
@@ -37,7 +37,7 @@ export function mergeSort<T>(
 }
 
 
-function _mergeSort<T>(
+function _mergeSort<T = any>(
   head: Node<T> | null,
   cmp: (a: T, b: T) => number
 ): Node<T> | null {
@@ -50,7 +50,7 @@ function _mergeSort<T>(
 }
 
 /** Разделяет список пополам и возвращает начало второй части */
-function split<T>(head: Node<T>): Node<T> {
+function split<T = any>(head: Node<T>): Node<T> {
   let slow: Node<T> = head
   let fast: Node<T> | null = head
 
@@ -65,7 +65,7 @@ function split<T>(head: Node<T>): Node<T> {
 }
 
 /** Слияние двух отсортированных списков */
-function merge<T>(
+function merge<T = any>(
   a: Node<T> | null,
   b: Node<T> | null,
   cmp: (a: T, b: T) => number

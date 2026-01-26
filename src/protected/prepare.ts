@@ -1,12 +1,11 @@
 import type {
   INode,
-  PreparedNodes,
 } from "./types"
 
-export function prepare<T>(
+export default function prepare<T = any>(
   iterable: Iterable<T>,
   reversed = false
-): PreparedNodes {
+) {
   let head: INode<T> | null = null
   let tail: INode<T> | null = null
   let temp: INode<T>
