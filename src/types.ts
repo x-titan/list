@@ -2,3 +2,4 @@ export type Predicate<T = any> = (value: T, index: number, thisArg: any) => bool
 export type Mapper<T = any, U = T> = (value: T, index: number, thisArg: any) => U
 export type Comparator<T = any> = (a: T, b: T) => number
 export type Consumer<T = any> = (value: T, index: number, thisArg: any) => void
+export type Reducer<T = any, U = T> = (accumulator: U, value: T, index: number, thisArg: any) => U
